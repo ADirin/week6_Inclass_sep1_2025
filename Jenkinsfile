@@ -20,7 +20,9 @@ pipeline {
 
         stage('Test') {
             steps {
-                bat 'mvn test'
+                // Run tests with JaCoCo agent
+                bat 'mvn test jacoco:report'
+                // List target directory to verify reports
                 bat 'dir target /s'
             }
         }
@@ -28,8 +30,19 @@ pipeline {
 
     post {
         always {
+            // Archive JUnit test results
             junit '**/target/surefire-reports/*.xml'
-            echo 'Pipeline completed'
+
+            // Optional: archive JaCoCo HTML report
+            publishHTML([
+                reportDir: 'target/site/jacoco',
+                reportFiles: 'index.html',
+                reportName: 'JaCoCo Coverage Report',
+                keepAll: true,
+                allowMissing: true
+            ])
+
+            echo 'Pipeline completed with tests and coverage'
         }
     }
 }
