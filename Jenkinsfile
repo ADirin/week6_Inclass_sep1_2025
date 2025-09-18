@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo 'Code checkout completed'
+                checkout scm
             }
         }
 
@@ -20,8 +20,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                bat 'mvn test'  // Run tests
-                // List all files in target directory to see what's generated
+                bat 'mvn test'
                 bat 'dir target /s'
             }
         }
@@ -29,10 +28,7 @@ pipeline {
 
     post {
         always {
-            // Try different patterns for test reports
             junit '**/target/surefire-reports/*.xml'
-            junit '**/target/test-reports/*.xml'
-            junit '**/target/*.xml'
             echo 'Pipeline completed'
         }
     }
