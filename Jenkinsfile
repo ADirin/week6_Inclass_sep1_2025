@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven3'
+        maven 'Maven3'   // Make sure 'Maven3' is configured in Jenkins tools
     }
 
     stages {
@@ -14,15 +14,18 @@ pipeline {
 
         stage('Build') {
             steps {
+                echo 'Building the project...'
                 bat 'mvn clean compile'
             }
         }
 
         stage('Test') {
             steps {
-                // Run tests with JaCoCo agent
+                echo 'Running tests with coverage...'
+                // Run tests and generate JaCoCo report
                 bat 'mvn test jacoco:report'
-                // List target directory to verify reports
+
+                // Optional: list all files in target to debug
                 bat 'dir target /s'
             }
         }
@@ -30,19 +33,20 @@ pipeline {
 
     post {
         always {
-            // Archive JUnit test results
+            // Publish JUnit test results
             junit '**/target/surefire-reports/*.xml'
 
-            // Optional: archive JaCoCo HTML report
+            // Publish JaCoCo HTML report
             publishHTML([
                 reportDir: 'target/site/jacoco',
                 reportFiles: 'index.html',
                 reportName: 'JaCoCo Coverage Report',
+                alwaysLinkToLastBuild: true,
                 keepAll: true,
                 allowMissing: true
             ])
 
-            echo 'Pipeline completed with tests and coverage'
+            echo 'Pipeline completed with tests and coverage.'
         }
     }
 }
